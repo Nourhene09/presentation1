@@ -429,7 +429,7 @@
         <thead><tr><th>Critère</th><th>Solutions existantes</th><th>✨ AinDetect</th></tr></thead>
         <tbody>
           <tr><td>Déploiement</td><td>Matériel dédié / PC uniquement</td><td class="hl">📱 Smartphone</td></tr>
-          <tr><td>Pathologies</td><td>1 à 2 maladies par solution</td><td class="hl">🎯 4 à 6 classes</td></tr>
+          <tr><td>Pathologies</td><td>1 à 2 maladies par solution</td><td class="hl">🎯 4 classes</td></tr>
           <tr><td>Coût</td><td>Très élevé (matériel + licences)</td><td class="hl">💰 SaaS abordable</td></tr>
           <tr><td>Interface</td><td>Complexe / spécialisée</td><td class="hl">✨ Intuitive Flutter</td></tr>
         </tbody>
@@ -524,21 +524,47 @@
   </div>
 </section>
 
-<!-- ═══ S14 — PARTIE MATÉRIELLE ═══ -->
+<!-- ═══ S14 — Partie Materielle ═══ -->
+
 <section class="slide">
-  <div class="slide-card card-light">
+  <div class="slide-card card-light" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    
     <div class="blob blob-1"></div><div class="blob blob-2"></div>
+    
     <div class="badge anim-item d1"><span class="badge-dot"></span> 05 — Partie Matérielle</div>
-    <div class="s-title anim-item d2">Environnement de développement</div>
-    <div class="anim-item d3" style="position:relative;z-index:2;flex:1;display:flex;flex-direction:column;gap:14px;">
+    
+    <div class="s-title anim-item d2" style="text-align: center; margin-bottom: 30px;">Environnement de développement</div>
+    
+    <div class="anim-item d3" style="position:relative; z-index:2; width: 100%; max-width: 900px;">
       
-      <div style="border-radius:16px;padding:20px;border:1px solid rgba(186,230,253,.5);background:white;">
-        <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--sky);margin-bottom:12px;"><i class="fas fa-laptop-code" style="margin-right:6px;"></i>Environnement logiciel</div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;">
-          <span class="hw-spec"><i class="fas fa-code"></i> Python 3.12.0</span>
-          <span class="hw-spec"><i class="fas fa-brain"></i> TensorFlow / Keras 2.10</span>
-          <span class="hw-spec"><i class="fab fa-android"></i> Android Studio</span>
-          <span class="hw-spec"><i class="fas fa-edit"></i> VS Code</span>
+      <div style="border-radius:24px; padding:35px; border:1px solid rgba(186,230,253,.6); background:white; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+        
+        <div style="font-size: 18px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--sky); margin-bottom: 25px; text-align: center;">
+          <i class="fas fa-laptop-code" style="margin-right:10px;"></i>Environnement logiciel
+        </div>
+        
+        <div style="display:flex; flex-wrap:wrap; gap:15px; justify-content: center;">
+          
+          <span class="hw-spec" style="display:flex; align-items:center; gap:12px; font-size: 22px; padding: 12px 20px;">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" alt="Python logo" width="30" height="30">
+            Python 3.12.0
+          </span>
+          
+          <span class="hw-spec" style="display:flex; align-items:center; gap:12px; font-size: 22px; padding: 12px 20px;">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tensorflow/tensorflow-original.svg" alt="TensorFlow logo" width="30" height="30">
+            TensorFlow / Keras 2.10
+          </span>
+          
+          <span class="hw-spec" style="display:flex; align-items:center; gap:12px; font-size: 22px; padding: 12px 20px;">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/androidstudio/androidstudio-original.svg" alt="Android Studio logo" width="30" height="30">
+            Android Studio
+          </span>
+          
+          <span class="hw-spec" style="display:flex; align-items:center; gap:12px; font-size: 22px; padding: 12px 20px;">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vscode/vscode-original.svg" alt="VS Code logo" width="30" height="30">
+            VS Code
+          </span>
+          
         </div>
       </div>
     </div>
@@ -747,13 +773,16 @@
   </div>
 </section>
 
-<!-- ═══ S18 — DATASET ═══ -->
 <section class="slide">
-  <div class="slide-card card-light">
+  <div class="slide-card card-light" style="display: flex; flex-direction: column; align-items: center;">
+    
     <div class="blob blob-1"></div><div class="blob blob-2"></div>
+    
     <div class="badge anim-item d1"><span class="badge-dot"></span> 08 — Dataset & Entraînement</div>
-    <div class="s-title anim-item d2">Datasets & Hyperparamètres</div>
-    <div class="ds-grid anim-item d3" style="margin-bottom:14px;">
+    
+    <div class="s-title anim-item d2" style="text-align: center;">Datasets & Hyperparamètres</div>
+    
+    <div class="ds-grid anim-item d3" style="margin-bottom:14px; display: flex; justify-content: center;">
       <div class="ds-card selected">
         <div class="ds-badge ok"><i class="fas fa-check"></i> Retenu</div>
         <div class="ds-name">Dataset 1 — Kaggle Eye Diseases</div>
@@ -762,23 +791,21 @@
         <div class="ds-row"><span class="ds-key">Split</span><span class="ds-val">80 / 10 / 10 %</span></div>
         <div class="ds-row"><span class="ds-key">Pathologies</span><span class="ds-val">Cataracte · Rétinopathie · Glaucome · Normal</span></div>
       </div>
-      <div class="ds-card">
-        <div class="ds-badge exp">Exploré</div>
-        <div class="ds-name">Dataset 2 — Kaggle (public)</div>
-        <div class="ds-row"><span class="ds-key">Classes</span><span class="ds-val">6 classes</span></div>
-        <div class="ds-row"><span class="ds-key">Images</span><span class="ds-val">4 843 images</span></div>
-        <div class="ds-row"><span class="ds-key">Split</span><span class="ds-val">80 / 20 %</span></div>
-        <div class="ds-row"><span class="ds-key">Pathologies</span><span class="ds-val">Rétinopathie · Glaucome · Sain · Cicatrice · Myopie · Ptérygion</span></div>
-      </div>
     </div>
-    <div class="anim-item d4" style="position:relative;z-index:2;">
-      <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--sky);margin-bottom:8px;">Hyperparamètres</div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+    
+    <div class="anim-item d4" style="position:relative; z-index:2; width: 100%;">
+      
+      <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--sky);margin-bottom:8px; text-align: center;">
+        Hyperparamètres
+      </div>
+      
+      <div style="display:flex;flex-wrap:wrap;gap:8px; justify-content: center;">
         <span class="hw-spec">Batch Size : 32</span>
         <span class="hw-spec">Époques : 30</span>
         <span class="hw-spec">Prétraitement : 224×224 px</span>
         <span class="hw-spec">Normalisation + Augmentation</span>
       </div>
+      
     </div>
   </div>
 </section>
@@ -1015,6 +1042,7 @@
       <div class="tl3-col">
         <div class="tl3-header"><div class="tl3-dot" style="background:var(--cyan);box-shadow:0 0 8px rgba(34,211,238,.4);"></div><div class="tl3-period">Moyen terme</div></div>
         <div class="tl3-item">Augmenter les datasets (objectif : 20 000+ images)</div>
+        <div class="tl3-item">Ameliorer les modeles pour plus de classes (objectif : 6 à 10 classes)</div>
         <div class="tl3-item">Tester Vision Transformers (ViT) + modèles hybrides CNN+Transformer</div>
         <div class="tl3-item">Intégrer Grad-CAM pour l'explicabilité des décisions IA,</div>
         <!--Intégration de Grad-CAM pour générer des cartes de chaleur visuelles, permettant aux cliniciens de comprendre et de valider les zones de la rétine ayant motivé le diagnostic de l'IA.--!>
