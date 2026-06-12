@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Soutenance — AinDetect</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Sora:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root{--deep:#080F1E;--navy:#0D1F3C;--ocean:#143960;--sky:#0EA5E9;--azure:#38BDF8;--cyan:#22D3EE;--aqua:#67E8F9;--mint:#A5F3FC;--frost:#E0F2FE;--ice:#F0F9FF;--snow:#FAFCFF;--text-dark:#0C4A6E;--text-mid:#475569;--text-muted:#94A3B8;--glass:rgba(255,255,255,0.05);--glass-border:rgba(255,255,255,0.08)}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Outfit',sans-serif;background:var(--deep);overflow:hidden;color:var(--text-mid);user-select:none}
+  #bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .deck::before{content:'';position:fixed;inset:0;z-index:0;opacity:.025;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px}
+  .deck{position:relative;width:100vw;height:100vh;z-index:1}
+  .slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:48px 40px 80px;opacity:0;visibility:hidden;transition:none}
+  .slide.active{opacity:1;visibility:visible}
+  .slide.active .slide-card{animation:cardIn .6s cubic-bezier(.16,1,.3,1) forwards}
+  .slide.active .anim-item{animation:fadeSlideUp .5s cubic-bezier(.16,1,.3,1) forwards}
+  @keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+  @keyframes fadeSlideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  .d1{animation-delay:.07s!important;opacity:0}.d2{animation-delay:.14s!important;opacity:0}.d3{animation-delay:.21s!important;opacity:0}.d4{animation-delay:.28s!important;opacity:0}.d5{animation-delay:.35s!important;opacity:0}.d6{animation-delay:.42s!important;opacity:0}.d7{animation-delay:.49s!important;opacity:0}.d8{animation-delay:.56s!important;opacity:0}
+  .slide-card{width:100%;max-width:1400px;height:100%;max-height:920px;border-radius:28px;padding:48px 60px;position:relative;overflow:hidden;display:flex;flex-direction:column;opacity:0}
+  .card-dark{background:linear-gradient(155deg,rgba(13,31,60,.92),rgba(8,15,30,.97));border:1px solid var(--glass-border);backdrop-filter:blur(40px);box-shadow:0 0 0 1px rgba(14,165,233,.04),0 12px 80px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.04);color:var(--frost)}
+  .card-light{background:linear-gradient(165deg,rgba(255,255,255,.97),rgba(240,249,255,.95));border:1px solid rgba(186,230,253,.5);backdrop-filter:blur(40px);box-shadow:0 6px 60px rgba(14,165,233,.05),0 1px 3px rgba(0,0,0,.03),inset 0 1px 0 rgba(255,255,255,.9);color:var(--text-mid)}
+  .card-dark::before{content:'';position:absolute;inset:-1px;border-radius:29px;padding:1px;background:conic-gradient(from var(--border-angle,0deg),transparent 60%,var(--sky) 78%,var(--cyan) 84%,transparent 100%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.4;animation:rotateBorder 8s linear infinite;pointer-events:none}
+  .card-light::before{content:'';position:absolute;inset:-1px;border-radius:29px;padding:1px;background:conic-gradient(from var(--border-angle,0deg),transparent 65%,rgba(14,165,233,.3) 80%,rgba(34,211,238,.2) 88%,transparent 100%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.5;animation:rotateBorder 10s linear infinite;pointer-events:none}
+  @property --border-angle{syntax:'<angle>';initial-value:0deg;inherits:false}
+  @keyframes rotateBorder{to{--border-angle:360deg}}
+  .blob{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;animation:blobFloat 10s ease-in-out infinite alternate}
+  .blob-1{width:280px;height:280px;background:rgba(14,165,233,.1);top:-80px;right:-60px}
+  .blob-2{width:200px;height:200px;background:rgba(34,211,238,.08);bottom:-50px;left:-50px;animation-delay:-4s}
+  .blob-3{width:160px;height:160px;background:rgba(56,189,248,.06);top:45%;left:55%;animation-delay:-6s}
+  .card-light .blob-1{background:rgba(14,165,233,.06)}.card-light .blob-2{background:rgba(34,211,238,.04)}.card-light .blob-3{background:rgba(56,189,248,.03)}
+  @keyframes blobFloat{0%{transform:translate(0,0) scale(1)}100%{transform:translate(15px,-15px) scale(1.08)}}
+  .badge{display:inline-flex;align-items:center;gap:8px;padding:7px 16px;font-size:12px;letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:16px;border-radius:8px;position:relative;z-index:2;align-self:flex-start}
+  .card-dark .badge{background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.15);color:var(--azure)}
+  .card-light .badge{background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.12);color:var(--sky)}
+  .badge-dot{width:6px;height:6px;border-radius:50%;background:var(--sky);box-shadow:0 0 8px var(--sky);animation:pulse 2s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+  .s-title{font-family:'Sora',sans-serif;font-size:34px;font-weight:800;line-height:1.2;margin-bottom:8px;position:relative;z-index:2}
+  .card-dark .s-title{color:#fff}.card-light .s-title{color:var(--text-dark)}
+  .s-subtitle{font-size:14px;font-weight:600;letter-spacing:2px;text-transform:uppercase;opacity:.4;margin-bottom:18px;position:relative;z-index:2}
+  .chip-row{display:flex;flex-wrap:wrap;gap:10px;position:relative;z-index:2;margin-top:auto;padding-top:12px}
+  .chip{padding:9px 18px;border-radius:100px;display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px;border:1px solid;transition:all .3s;cursor:default}
+  .chip:hover{transform:translateY(-2px) scale(1.02)}
+  .card-dark .chip{background:rgba(14,165,233,.06);border-color:rgba(14,165,233,.15);color:var(--azure)}.card-dark .chip:hover{background:rgba(14,165,233,.12);box-shadow:0 4px 20px rgba(14,165,233,.08)}
+  .card-light .chip{background:white;border-color:rgba(186,230,253,.5);color:var(--sky)}.card-light .chip:hover{background:rgba(14,165,233,.03);box-shadow:0 4px 20px rgba(14,165,233,.06)}
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;position:relative;z-index:2;flex:1;align-content:start}
+  .stat-card{border-radius:20px;padding:22px;border:1px solid;display:flex;flex-direction:column;gap:6px;transition:all .4s;position:relative;overflow:hidden}
+  .stat-card:hover{transform:translateY(-3px) scale(1.005)}
+  .card-dark .stat-card{background:var(--glass);border-color:var(--glass-border)}.card-dark .stat-card:hover{border-color:rgba(14,165,233,.25);box-shadow:0 8px 30px rgba(14,165,233,.06)}
+  .card-light .stat-card{background:white;border-color:rgba(186,230,253,.4)}.card-light .stat-card:hover{border-color:rgba(14,165,233,.3);box-shadow:0 8px 30px rgba(14,165,233,.06)}
+  .stat-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;margin-bottom:4px}
+  .card-dark .stat-icon{background:rgba(14,165,233,.1);color:var(--azure)}.card-light .stat-icon{background:rgba(14,165,233,.06);color:var(--sky)}
+  .stat-num{font-family:'Sora',sans-serif;font-size:34px;font-weight:900;line-height:1;background:linear-gradient(135deg,var(--azure),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .stat-label{font-size:13px;font-weight:500;opacity:.7;line-height:1.4}
+  .card-dark .stat-label{color:var(--frost)}.card-light .stat-label{color:var(--text-mid)}
+  .swot-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;position:relative;z-index:2}
+  .swot-box{border-radius:16px;padding:14px 16px;border:1px solid;border-left:4px solid;transition:all .3s}
+  .swot-box:hover{transform:scale(1.015)}
+  .card-dark .swot-box{background:var(--glass);border-color:var(--glass-border)}.card-light .swot-box{background:white;border-color:rgba(186,230,253,.4)}
+  .sw-s{border-left-color:#10B981!important}.sw-w{border-left-color:#EF4444!important}.sw-o{border-left-color:#0EA5E9!important}.sw-t{border-left-color:#F59E0B!important}
+  .swot-label{font-family:'Sora',sans-serif;font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .sw-s .swot-label{color:#10B981}.sw-w .swot-label{color:#EF4444}.sw-o .swot-label{color:#0EA5E9}.sw-t .swot-label{color:#F59E0B}
+  .swot-text{font-size:12px;line-height:1.6;opacity:.8}
+  .card-dark .swot-text{color:var(--frost)}.card-light .swot-text{color:var(--text-mid)}
+  .proto-list{display:flex;flex-direction:column;gap:9px;position:relative;z-index:2}
+  .proto-row{display:flex;align-items:flex-start;gap:16px;padding:14px 20px;border-radius:14px;border:1px solid;transition:all .3s}
+  .proto-row:hover{transform:translateX(5px)}
+  .card-dark .proto-row{background:var(--glass);border-color:var(--glass-border)}.card-light .proto-row{background:white;border-color:rgba(186,230,253,.4)}
+  .proto-row i{font-size:18px;color:var(--sky);flex-shrink:0;margin-top:2px;transition:transform .3s}
+  .proto-row:hover i{transform:scale(1.15)}
+  .proto-text{font-size:13px;line-height:1.5}
+  .card-dark .proto-text{color:var(--frost)}.card-light .proto-text{color:var(--text-mid)}
+  .proto-title{font-weight:700;font-size:14px;margin-bottom:2px}
+  .card-dark .proto-title{color:#fff}.card-light .proto-title{color:var(--text-dark)}
+  .ty-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:20px;flex:1;position:relative;z-index:2}
+  .ty-title{font-family:'Sora',sans-serif;font-size:68px;font-weight:900;background:linear-gradient(135deg,var(--azure) 0%,var(--cyan) 40%,var(--aqua) 70%,var(--mint) 100%);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gradShift 4s ease-in-out infinite}
+  @keyframes gradShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+  .ty-sub{font-size:17px;opacity:.5;max-width:560px;line-height:1.7}
+  .progress-track{position:fixed;top:0;left:0;right:0;height:3px;background:rgba(14,165,233,.06);z-index:200}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--sky),var(--cyan),var(--aqua));border-radius:0 2px 2px 0;transition:width .4s cubic-bezier(.16,1,.3,1);box-shadow:0 0 10px rgba(14,165,233,.4)}
+  .topbar{position:fixed;top:3px;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;z-index:150;background:rgba(8,15,30,.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(14,165,233,.04)}
+  .topbar-l{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--azure);font-weight:700;letter-spacing:2px;text-transform:uppercase}
+  .topbar-r{display:flex;align-items:center;gap:8px}
+  .tb-btn{padding:7px 16px;border-radius:8px;border:1px solid rgba(14,165,233,.15);background:rgba(14,165,233,.05);color:var(--azure);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s;font-family:'Outfit',sans-serif;letter-spacing:.5px}
+  .tb-btn:hover{background:rgba(14,165,233,.12);border-color:rgba(14,165,233,.3);transform:translateY(-1px)}
+  .bottomnav{position:fixed;bottom:0;left:0;right:0;height:56px;display:flex;align-items:center;justify-content:center;gap:12px;z-index:150;background:rgba(8,15,30,.75);backdrop-filter:blur(20px);border-top:1px solid rgba(14,165,233,.04)}
+  .bn-btn{width:38px;height:38px;border-radius:10px;border:1px solid rgba(14,165,233,.12);background:rgba(14,165,233,.05);color:var(--azure);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s}
+  .bn-btn:hover:not(:disabled){background:rgba(14,165,233,.12);border-color:rgba(14,165,233,.3);transform:scale(1.06)}.bn-btn:disabled{opacity:.15;cursor:not-allowed}
+  .bn-dots{display:flex;gap:4px;align-items:center}
+  .bn-dot{width:7px;height:7px;border-radius:50%;background:rgba(14,165,233,.12);border:none;cursor:pointer;transition:all .35s}
+  .bn-dot.on{width:28px;border-radius:4px;background:var(--sky);box-shadow:0 0 8px rgba(14,165,233,.35)}.bn-dot:hover:not(.on){background:rgba(14,165,233,.3)}
+  .bn-counter{font-family:'Sora',sans-serif;font-size:11px;color:var(--azure);font-weight:600;min-width:50px;text-align:center;opacity:.6}
+  .sidepills{position:fixed;right:10px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:3px;z-index:100;opacity:0;transition:opacity .3s}
+  .deck:hover .sidepills{opacity:1}
+  .sp{width:30px;height:18px;border-radius:4px;border:1px solid rgba(14,165,233,.08);background:rgba(14,165,233,.03);cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;font-size:7px;color:rgba(14,165,233,.25);font-weight:700}
+  .sp.on{border-color:rgba(14,165,233,.35);background:rgba(14,165,233,.12);color:var(--azure)}.sp:hover:not(.on){border-color:rgba(14,165,233,.2);background:rgba(14,165,233,.08)}
+  .toast{position:fixed;top:54px;left:50%;transform:translateX(-50%) translateY(-14px);padding:10px 22px;border-radius:12px;background:rgba(8,15,30,.92);border:1px solid rgba(14,165,233,.2);color:var(--azure);font-size:13px;font-weight:600;z-index:300;opacity:0;transition:all .35s;backdrop-filter:blur(16px);pointer-events:none;display:flex;align-items:center;gap:8px;white-space:nowrap}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  @media(max-width:768px){.slide{padding:14px 10px 68px}.slide-card{padding:22px 16px;border-radius:18px}.s-title{font-size:22px}.sidepills{display:none}}
+  @media print{.bottomnav,.topbar,.sidepills,.progress-track,#bgCanvas,.toast{display:none!important}.slide{position:relative!important;opacity:1!important;visibility:visible!important;page-break-after:always}.slide-card{opacity:1!important}.anim-item{opacity:1!important;animation:none!important}.deck{overflow:visible;height:auto}}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01s!important;transition-duration:.01s!important}#bgCanvas{display:none}}
+
+  /* ── Custom styles ── */
+  .data-table{width:100%;border-collapse:collapse;font-size:12.5px;position:relative;z-index:2}
+  .data-table th{padding:9px 12px;text-align:left;font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid rgba(14,165,233,.15)}
+  .card-dark .data-table th{color:var(--azure)}.card-light .data-table th{color:var(--sky)}
+  .data-table td{padding:9px 12px;border-bottom:1px solid rgba(14,165,233,.05);line-height:1.4}
+  .card-dark .data-table td{color:var(--frost)}.card-light .data-table td{color:var(--text-mid)}
+  .data-table tr:hover td{background:rgba(14,165,233,.03)}
+  .data-table .hl{color:var(--sky);font-weight:700}
+  .data-table .hl-row td{background:rgba(14,165,233,.05);font-weight:600}
+  .card-dark .data-table .hl-row td{color:var(--azure)}.card-light .data-table .hl-row td{color:var(--sky)}
+
+  .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;position:relative;z-index:2}
+  .col-card{border-radius:15px;padding:16px 18px;border:1px solid;display:flex;flex-direction:column;gap:6px}
+  .col-card:hover{transform:translateY(-3px)}
+  .card-dark .col-card{background:var(--glass);border-color:var(--glass-border);transition:all .3s}
+  .card-light .col-card{background:white;border-color:rgba(186,230,253,.4);transition:all .3s}
+  .col-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .col-icon{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--sky),var(--cyan));display:flex;align-items:center;justify-content:center;color:white;font-size:12px;flex-shrink:0}
+  .col-title{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--azure)}
+  .col-item{font-size:12px;line-height:1.6;display:flex;align-items:flex-start;gap:6px;opacity:.85}
+  .col-item::before{content:'▸';color:var(--azure);flex-shrink:0;font-size:10px;margin-top:3px}
+  .card-dark .col-item{color:var(--frost)}.card-light .col-item{color:var(--text-mid)}
+
+  .note-box{border-radius:12px;padding:12px 16px;margin-top:12px;position:relative;z-index:2;font-size:12.5px;display:flex;align-items:center;gap:10px;font-weight:500}
+  .card-dark .note-box{background:rgba(14,165,233,.05);border:1px solid rgba(14,165,233,.15);color:var(--azure)}
+  .card-light .note-box{background:rgba(14,165,233,.04);border:1px solid rgba(14,165,233,.15);color:var(--sky)}
+
+  .quote-box{border-radius:18px;padding:26px 32px;position:relative;z-index:2;margin-bottom:16px;border-left:4px solid var(--sky)}
+  .card-dark .quote-box{background:rgba(14,165,233,.04);border:1px solid rgba(14,165,233,.1);border-left-color:var(--sky)}
+  .card-light .quote-box{background:rgba(14,165,233,.02);border:1px solid rgba(14,165,233,.12);border-left-color:var(--sky)}
+  .quote-text{font-family:'Sora',sans-serif;font-size:17px;font-weight:600;line-height:1.65;font-style:italic}
+  .card-dark .quote-text{color:var(--frost)}.card-light .quote-text{color:var(--text-dark)}
+
+  .obj-row{display:flex;align-items:flex-start;gap:14px;padding:11px 16px;border-radius:12px;border:1px solid;transition:all .3s;margin-bottom:7px}
+  .obj-row:hover{transform:translateX(4px)}
+  .card-dark .obj-row{background:var(--glass);border-color:var(--glass-border)}
+  .card-light .obj-row{background:white;border-color:rgba(186,230,253,.4)}
+  .obj-num{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--sky),var(--cyan));color:white;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-weight:900;font-size:14px;flex-shrink:0}
+  .obj-body{display:flex;flex-direction:column;gap:2px}
+  .obj-title{font-weight:700;font-size:13px}
+  .card-dark .obj-title{color:#fff}.card-light .obj-title{color:var(--text-dark)}
+  .obj-text{font-size:12px;opacity:.7;line-height:1.4}
+  .card-dark .obj-text{color:var(--frost)}.card-light .obj-text{color:var(--text-mid)}
+
+  
+
+  .arch-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;position:relative;z-index:2;flex:1;align-content:start}
+  .arch-col{border-radius:15px;padding:18px;border:1px solid;display:flex;flex-direction:column;gap:7px}
+  .card-dark .arch-col{background:var(--glass);border-color:var(--glass-border)}
+  .card-light .arch-col{background:white;border-color:rgba(186,230,253,.4)}
+  .arch-header{display:flex;align-items:center;gap:10px;margin-bottom:6px;padding-bottom:10px;border-bottom:1px solid rgba(14,165,233,.1)}
+  .arch-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--sky),var(--cyan));display:flex;align-items:center;justify-content:center;color:white;font-size:13px;flex-shrink:0}
+  .arch-name{font-family:'Sora',sans-serif;font-weight:700;font-size:13px}
+  .card-dark .arch-name{color:var(--frost)}.card-light .arch-name{color:var(--text-dark)}
+  .arch-sub{font-size:10px;opacity:.45}
+  .arch-item{font-size:12px;line-height:1.55;display:flex;align-items:flex-start;gap:6px;opacity:.8}
+  .arch-item::before{content:'◦';color:var(--azure);flex-shrink:0;font-size:14px;line-height:1.2}
+  .card-dark .arch-item{color:var(--frost)}.card-light .arch-item{color:var(--text-mid)}
+
+  .feat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;position:relative;z-index:2;flex:1;align-content:start}
+  .feat-card{border-radius:15px;padding:18px;border:1px solid;display:flex;flex-direction:column;gap:7px;transition:all .35s}
+  .feat-card:hover{transform:translateY(-3px)}
+  .card-dark .feat-card{background:var(--glass);border-color:var(--glass-border)}.card-dark .feat-card:hover{border-color:rgba(14,165,233,.25);box-shadow:0 8px 30px rgba(14,165,233,.06)}
+  .card-light .feat-card{background:white;border-color:rgba(186,230,253,.4)}.card-light .feat-card:hover{border-color:rgba(14,165,233,.3);box-shadow:0 8px 30px rgba(14,165,233,.06)}
+  .feat-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px}
+  .card-dark .feat-icon{background:rgba(14,165,233,.1);color:var(--azure)}.card-light .feat-icon{background:rgba(14,165,233,.06);color:var(--sky)}
+  .feat-title{font-weight:700;font-size:13px}
+  .card-dark .feat-title{color:#fff}.card-light .feat-title{color:var(--text-dark)}
+  .feat-desc{font-size:11.5px;opacity:.65;line-height:1.5}
+
+  .big-stats{display:flex;gap:14px;position:relative;z-index:2;margin-bottom:14px}
+  .big-stat{flex:1;border-radius:16px;padding:18px;border:1px solid;text-align:center;transition:all .35s}
+  .big-stat:hover{transform:translateY(-3px)}
+  .card-dark .big-stat{background:var(--glass);border-color:var(--glass-border)}.card-dark .big-stat:hover{border-color:rgba(14,165,233,.25)}
+  .card-light .big-stat{background:white;border-color:rgba(186,230,253,.4)}.card-light .big-stat:hover{border-color:rgba(14,165,233,.3)}
+  .big-stat-num{font-family:'Sora',sans-serif;font-size:38px;font-weight:900;background:linear-gradient(135deg,var(--azure),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .big-stat-label{font-size:11px;font-weight:600;opacity:.5;margin-top:4px;text-transform:uppercase;letter-spacing:1px}
+
+  .perf-table{width:100%;border-collapse:collapse;font-size:13px;position:relative;z-index:2}
+  .perf-table th{padding:9px 12px;text-align:center;font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;border-bottom:2px solid rgba(14,165,233,.2)}
+  .card-dark .perf-table th{color:var(--azure)}.card-light .perf-table th{color:var(--sky)}
+  .perf-table td{padding:9px 12px;text-align:center;border-bottom:1px solid rgba(14,165,233,.06)}
+  .card-dark .perf-table td{color:var(--frost)}.card-light .perf-table td{color:var(--text-mid)}
+  .perf-table tr:hover td{background:rgba(14,165,233,.04)}
+  .perf-table .avg-row td{font-weight:800;color:var(--sky)!important;border-top:2px solid rgba(14,165,233,.2)}
+
+  .tl3{display:flex;gap:12px;position:relative;z-index:2;flex:1}
+  .tl3-col{flex:1;border-radius:15px;padding:18px;border:1px solid;display:flex;flex-direction:column;gap:8px}
+  .card-dark .tl3-col{background:var(--glass);border-color:var(--glass-border)}
+  .card-light .tl3-col{background:white;border-color:rgba(186,230,253,.4)}
+  .tl3-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;padding-bottom:8px;border-bottom:1px solid rgba(14,165,233,.1)}
+  .tl3-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+  .tl3-period{font-family:'Sora',sans-serif;font-weight:800;font-size:14px}
+  .card-dark .tl3-period{color:#fff}.card-light .tl3-period{color:var(--text-dark)}
+  .tl3-item{font-size:12px;line-height:1.55;display:flex;align-items:flex-start;gap:6px;opacity:.85}
+  .tl3-item::before{content:'→';color:var(--azure);flex-shrink:0;font-size:11px;margin-top:2px}
+  .card-dark .tl3-item{color:var(--frost)}.card-light .tl3-item{color:var(--text-mid)}
+
+  .ds-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;position:relative;z-index:2}
+  .ds-card{border-radius:16px;padding:20px;border:2px solid;transition:all .35s}
+  .card-dark .ds-card{background:var(--glass);border-color:var(--glass-border)}
+  .card-dark .ds-card.selected{border-color:rgba(14,165,233,.4);background:rgba(14,165,233,.05)}
+  .card-light .ds-card{background:white;border-color:rgba(186,230,253,.4)}
+  .card-light .ds-card.selected{border-color:rgba(14,165,233,.35);background:rgba(14,165,233,.02)}
+  .ds-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+  .ds-badge.ok{background:rgba(16,185,129,.1);color:#10B981;border:1px solid rgba(16,185,129,.2)}
+  .ds-badge.exp{background:rgba(148,163,184,.08);color:#94A3B8;border:1px solid rgba(148,163,184,.15)}
+  .ds-name{font-family:'Sora',sans-serif;font-weight:700;font-size:14px;margin-bottom:10px}
+  .card-dark .ds-name{color:#fff}.card-light .ds-name{color:var(--text-dark)}
+  .ds-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:5px 0;border-bottom:1px solid rgba(14,165,233,.05)}
+  .ds-key{opacity:.5}.ds-val{font-weight:600;color:var(--azure)}
+
+  .bilan-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;position:relative;z-index:2;flex:1}
+  .bilan-card{border-radius:15px;padding:18px;border:1px solid;border-left:4px solid;display:flex;flex-direction:column;gap:8px}
+  .card-dark .bilan-card{background:var(--glass);border-color:var(--glass-border)}
+  .card-light .bilan-card{background:white;border-color:rgba(186,230,253,.4)}
+  .bilan-card.tech{border-left-color:#0EA5E9!important}.bilan-card.eco{border-left-color:#10B981!important}.bilan-card.soc{border-left-color:#A78BFA!important}
+  .bilan-head{font-family:'Sora',sans-serif;font-weight:800;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+  .bilan-card.tech .bilan-head{color:#0EA5E9}.bilan-card.eco .bilan-head{color:#10B981}.bilan-card.soc .bilan-head{color:#A78BFA}
+  .bilan-item{font-size:12px;line-height:1.55;display:flex;align-items:flex-start;gap:6px;opacity:.85}
+  .bilan-item::before{content:'✓';flex-shrink:0;font-size:11px}
+  .bilan-card.tech .bilan-item::before{color:#0EA5E9}.bilan-card.eco .bilan-item::before{color:#10B981}.bilan-card.soc .bilan-item::before{color:#A78BFA}
+  .card-dark .bilan-item{color:var(--frost)}.card-light .bilan-item{color:var(--text-mid)}
+
+  .hw-spec{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;margin:4px}
+  .card-dark .hw-spec{background:rgba(14,165,233,.07);border:1px solid rgba(14,165,233,.15);color:var(--azure)}
+  .card-light .hw-spec{background:rgba(14,165,233,.04);border:1px solid rgba(14,165,233,.12);color:var(--sky)}
+
+  .flow-wrap{display:flex;align-items:center;justify-content:center;gap:10px;position:relative;z-index:2;flex-wrap:wrap;margin:16px 0}
+  .flow-node{border-radius:12px;padding:12px 18px;border:1px solid;font-size:13px;font-weight:600;text-align:center;transition:all .3s}
+  .flow-node:hover{transform:scale(1.03)}
+  .card-dark .flow-node{background:rgba(14,165,233,.08);border-color:rgba(14,165,233,.2);color:var(--azure)}
+  .card-light .flow-node{background:white;border-color:rgba(186,230,253,.5);color:var(--sky)}
+  .flow-arrow{color:var(--azure);font-size:20px;flex-shrink:0}
+
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;position:relative;z-index:2}
+  .info-card{border-radius:14px;padding:16px;border:1px solid;display:flex;align-items:flex-start;gap:12px;transition:all .3s}
+  .info-card:hover{transform:translateX(4px)}
+  .card-dark .info-card{background:var(--glass);border-color:var(--glass-border)}
+  .card-light .info-card{background:white;border-color:rgba(186,230,253,.4)}
+  .info-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+  .card-dark .info-ico{background:rgba(14,165,233,.1);color:var(--azure)}.card-light .info-ico{background:rgba(14,165,233,.06);color:var(--sky)}
+  .info-label{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;opacity:.45;margin-bottom:4px}
+  .info-value{font-size:12.5px;line-height:1.5}
+  .card-dark .info-value{color:var(--frost)}.card-light .info-value{color:var(--text-mid)}
+
+  .model-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;margin:3px;border:1px solid;transition:all .3s}
+  .model-chip:hover{transform:scale(1.03)}
+  .card-dark .model-chip{background:var(--glass);border-color:var(--glass-border);color:var(--frost)}
+  .card-light .model-chip{background:white;border-color:rgba(186,230,253,.4);color:var(--text-mid)}
+  .model-chip.winner{background:linear-gradient(135deg,rgba(14,165,233,.15),rgba(34,211,238,.1));border-color:rgba(14,165,233,.4);color:var(--azure)!important;font-weight:800}
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+<div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+<header class="topbar">
+  <div class="topbar-l"><i class="fas fa-eye"></i> Soutenance — AinDetect</div>
+  <div class="topbar-r">
+    <button class="tb-btn" onclick="toggleFS()" aria-label="Plein écran"><i class="fas fa-expand"></i></button>
+  </div>
+</header>
+
+<div class="toast" id="toast"><i class="fas fa-check-circle"></i><span id="toastTxt"></span></div>
+
+<main class="deck" id="deck">
+
+<!-- ═══ S0 — PAGE DE GARDE ═══ -->
+<section class="slide active">
+  <div class="slide-card card-dark" style="justify-content:center;align-items:center;text-align:center;padding:40px;">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div>
+    <div style="position:relative;z-index:5;display:flex;flex-direction:column;align-items:center;gap:18px;">
+      <div class="anim-item d1" style="font-size:11px;font-weight:800;letter-spacing:4px;text-transform:uppercase;color:var(--azure);opacity:.7;">Université Djillali Liabès — SBA &nbsp;|&nbsp; Spécialité WIC &nbsp;|&nbsp; Startup 1275</div>
+      <div class="anim-item d2" style="width:100px;height:100px;display:flex;align-items:center;justify-content:center;">
+        <img src="https://i.postimg.cc/wjD8NK8W/LOGO-AINDETECT.png" alt="Logo AinDetect" style="max-width:300%;max-height:300%;object-fit:contain;">
+      </div>
+      <h1 class="anim-item d3" style="font-family:'Sora',sans-serif;font-size:72px;font-weight:900;color:#fff;line-height:1;margin:0;">AinDetect</h1>
+      <div class="anim-item d4" style="font-size:19px;color:var(--azure);font-weight:500;max-width:560px;line-height:1.5;">Application mobile intelligente pour la détection des maladies oculaires</div>
+      <div class="anim-item d5" style="display:flex;flex-direction:column;gap:6px;font-size:14px;opacity:.65;margin-top:6px;">
+        <div><i class="fas fa-user-graduate" style="margin-right:8px;color:var(--sky);"></i>Étudiante : <strong style="color:var(--frost);">Mlle. Belabiod Nourhene</strong></div>
+        <div><i class="fas fa-chalkboard-teacher" style="margin-right:8px;color:var(--sky);"></i>Encadrante : <strong style="color:var(--frost);">Dr. Benbakreti Soumia</strong></div>
+        <div><i class="fas fa-calendar-alt" style="margin-right:8px;color:var(--sky);"></i>Soutenance : <strong style="color:var(--frost);">11 Juin 2026</strong></div>
+      </div>
+      <button class="anim-item d6" onclick="goTo(cur+1)" style="margin-top:10px;padding:12px 32px;border-radius:12px;background:rgba(14,165,233,.18);color:var(--azure);font-size:14px;font-weight:700;cursor:pointer;border:1px solid rgba(14,165,233,.3);transition:all .3s;" onmouseover="this.style.background='rgba(14,165,233,.28)'" onmouseout="this.style.background='rgba(14,165,233,.18)'">
+        Commencer &nbsp;<i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S1 — PLAN DE PRÉSENTATION ═══ -->
+<section class="slide">
+  <div class="slide-card card-light">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div>
+    <div class="badge anim-item d1"><span class="badge-dot"></span> Plan de Présentation</div>
+    <div class="s-title anim-item d2">Sommaire</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:1;align-content:start;position:relative;z-index:2;">
+      <div class="anim-item d3" style="display:flex;flex-direction:column;gap:8px;">
+        <div class="proto-row" style="padding:12px 16px;"><div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--sky),var(--cyan));display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:900;flex-shrink:0;">1</div><div><div class="proto-title">Introduction</div><div class="proto-text">Contexte · Problématique · Objectifs</div></div></div>
+        <div class="proto-row" style="padding:12px 16px;"><div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--sky),var(--cyan));display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:900;flex-shrink:0;">2</div><div><div class="proto-title">Analyse de l'existant</div><div class="proto-text">Solutions · Limites · Positionnement</div></div></div>
+        <div class="proto-row" style="padding:12px 16px;"><div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--sky),var(--cyan));display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:900;flex-shrink:0;">3</div><div><div class="proto-title">Solution proposée</div><div class="proto-text">Vue globale · Fonctionnalités</div></div></div>
+        <div class="proto-row" style="padding:12px 16px;"><div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--sky),var(--cyan));display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:900;flex-shrink:0;">4</div><div><div class="proto-title">Conception</div><div class="proto-text">Architecture générale du système</div></div></div>
+        <div class="proto-row" style="padding:12px 16px;"><div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--sky),var(--cyan));display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:900;flex-shrink:0;">5</div><div><div class="proto-title">Partie matérielle</div><div class="proto-text">Environnement & équipement</div></div></div>
+      </div>
+      <div class="anim-item d4" style="display:flex;flex-direction:column;gap:8px;">
+        <div class="proto-row" style="padding:12px 16px;"><div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--sky),var(--cyan));display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:900;flex-shrink:0;">6</div><div><div class="proto-title">Backend & BDD</div><div class="proto-text">Firebase · API · Structure</div></div></div>
+        <div class="proto-row" style="padding:12px 16px;"><div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--sky),var(--cyan));display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:900;flex-shrink:0;">7</div><div><div class="proto-title">Application mobile</div><div class="proto-text">Interfaces & Flutter</div></div></div>
+        <div class="proto-row" style="padding:12px 16px;"><div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--sky),var(--cyan));display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:900;flex-shrink:0;">8</div><div><div class="proto-title">Intelligence artificielle</div><div class="proto-text">EfficientNetV2-S · Dataset · Entraînement</div></div></div>
+        <div class="proto-row" style="padding:12px 16px;"><div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--sky),var(--cyan));display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:900;flex-shrink:0;">9</div><div><div class="proto-title">Tests & Résultats</div><div class="proto-text">Validation · Performances</div></div></div>
+        <div class="proto-row" style="padding:12px 16px;"><div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--sky),var(--cyan));display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:900;flex-shrink:0;">10</div><div><div class="proto-title">Conclusion</div><div class="proto-text">Bilan · Limites · Perspectives</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S2 — CONTEXTE ═══ -->
+<section class="slide">
+  <div class="slide-card card-dark">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div>
+    <div class="badge anim-item d1"><span class="badge-dot"></span> 01 — Introduction</div>
+    <div class="s-title anim-item d2">Contexte Général</div>
+    <div class="stat-grid anim-item d3" style="flex:1;">
+      <div class="stat-card"><div class="stat-icon"><i class="fas fa-globe"></i></div><div style="font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--azure);margin-bottom:4px;">Enjeu Mondial</div><div class="stat-label">Les maladies oculaires (glaucome, rétinopathie, cataracte) sont les 1ères causes de cécité évitable dans le monde.</div></div>
+      <div class="stat-card"><div class="stat-icon"><i class="fas fa-map-marked-alt"></i></div><div style="font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--azure);margin-bottom:4px;">Algérie</div><div class="stat-label">Montée du diabète + vieillissement de la population = pression croissante sur les spécialistes ophtalmologiques.</div></div>
+<div class="stat-card">
+  <div class="stat-icon"><i class="fas fa-user-md"></i></div>
+  <div style="font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--azure);margin-bottom:4px;">
+    Surcharge des Spécialistes
+  </div>
+  <div class="stat-label">
+    Le nombre croissant d'examens rétiniens à interpréter mobilise fortement les ophtalmologues et ralentit le processus de dépistage.
+  </div>
+</div>      <div class="stat-card"><div class="stat-icon"><i class="fas fa-clock"></i></div><div style="font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--azure);margin-bottom:4px;">Diagnostic Lent</div><div class="stat-label">L'examen du fond d'œil est chronophage, dépend de la disponibilité des spécialistes.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S3 — PROBLÉMATIQUE ═══ -->
+<section class="slide">
+  <div class="slide-card card-light">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div>
+    <div class="badge anim-item d1"><span class="badge-dot"></span> 01 — Problématique</div>
+    <div class="s-title anim-item d2">Problématique</div>
+    <div class="quote-box anim-item d3">
+      <div class="quote-text">❝ Comment démocratiser l'accès au diagnostic ophtalmologique de précision via une solution mobile légère, tout en garantissant une fiabilité clinique basée sur les dernières architectures d'IA ? ❞</div>
+    </div>
+    <div style="position:relative;z-index:2;flex:1;">
+      <div style="font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--sky);margin-bottom:12px;">Enjeux identifiés</div>
+      <div class="anim-item d4" style="display:flex;flex-direction:column;gap:8px;">
+        <div class="proto-row"><i class="fas fa-triangle-exclamation" style="color:var(--sky);"></i><div class="proto-text">Retards de diagnostic pouvant mener à une cécité irréversible</div></div>
+        <div class="proto-row"><i class="fas fa-server" style="color:var(--sky);"></i><div class="proto-text">Solutions IA existantes trop lourdes pour un déploiement terrain</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S4 — OBJECTIFS ═══ -->
+<section class="slide">
+  <div class="slide-card card-dark">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div>
+    <div class="badge anim-item d1"><span class="badge-dot"></span> 01 — Objectifs</div>
+    <div class="s-title anim-item d2">Notre Mission : AinDetect</div>
+    <div class="s-subtitle anim-item d3">Développer une application mobile intelligente pour détecter automatiquement les maladies oculaires à partir d'images fundus</div>
+    <div class="anim-item d4" style="flex:1;display:flex;flex-direction:column;gap:7px;position:relative;z-index:2;">
+      <div class="obj-row"><div class="obj-num">1</div><div class="obj-body"><div class="obj-title">Modèle Deep Learning</div><div class="obj-text">Conception d'un modèle pour la classification des pathologies oculaires</div></div></div>
+      <div class="obj-row"><div class="obj-num">2</div><div class="obj-body"><div class="obj-title">Interface mobile intuitive</div><div class="obj-text">Développement d'une application Flutter Android</div></div></div>
+      <div class="obj-row"><div class="obj-num">3</div><div class="obj-body"><div class="obj-title">Backend cloud sécurisé</div><div class="obj-text">Intégration d'un backend Firebase pour l'authentification, le stockage et les données</div></div></div>
+      <div class="obj-row"><div class="obj-num">4</div><div class="obj-body"><div class="obj-title">Modèle économique viable</div><div class="obj-text">Proposition d'un business model SaaS dans le cadre du dispositif Startup 1275</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S5 — SOLUTIONS EXISTANTES ═══ -->
+<section class="slide">
+  <div class="slide-card card-light">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div>
+    <div class="badge anim-item d1"><span class="badge-dot"></span> 02 — Analyse de l'Existant</div>
+    <div class="s-title anim-item d2">Solutions Existantes</div>
+    <div class="s-subtitle anim-item d3">Revue de littérature scientifique (2016–2025)</div>
+    <div class="anim-item d4" style="flex:1;position:relative;z-index:2;overflow:auto;">
+      <table class="data-table">
+        <thead><tr><th>Référence / Système</th><th>Maladie ciblée</th><th>Données / Performances</th><th>Type de solution</th></tr></thead>
+        <tbody>
+          <tr><td><strong>SCREEN-DR</strong><br><small>(Pedrosa et al., 2018)</small></td><td>Rétinopathie diabétique</td><td>701 images<br>1826 annotations</td><td>Plateforme collaborative de télémédecine</td></tr>
+          <tr><td><strong>EyePACS</strong><br><small>(Cuadros & Bresnick, 2009)</small></td><td>Rétinopathie diabétique</td><td>> 34 000 examens</td><td>Système web de télémédecine</td></tr>
+          <tr><td><strong>RetCAD</strong><br><small>(Bauer et al., 2024)</small></td><td>Rétinopathie diabétique</td><td>Sensibilité 90 %<br>Spécificité 100 %</td><td>IA clinique basée sur Deep Learning</td></tr>
+          <tr><td><strong>OphtAI</strong><br><small>(Bauer et al., 2024)</small></td><td>Rétinopathie diabétique</td><td>Sensibilité 70 %<br>Spécificité 100 %</td><td>IA clinique basée sur Deep Learning</td></tr>
+          <tr><td><strong>Revue scientifique</strong><br><small>(Hagiwara et al., 2018)</small></td><td>Glaucome</td><td>Études multiples</td><td>ML & Deep Learning</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note-box anim-item d5"><i class="fas fa-lightbulb"></i> Les travaux existants démontrent l'efficacité de l'IA pour le dépistage des maladies oculaires, mais présentent encore des limites en termes d'accessibilité, de déploiement mobile et d'intégration dans les contextes à ressources limitées.</div>
+  </div>
+</section>
+
+<!-- ═══ S6 — LIMITES ═══ -->
+<section class="slide">
+  <div class="slide-card card-dark">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div>
+    <div class="badge anim-item d1"><span class="badge-dot"></span> 02 — Analyse de l'Existant</div>
+    <div class="s-title anim-item d2">Limites des solutions existantes</div>
+    <div class="anim-item d3" style="flex:1;display:flex;justify-content:center;align-items:center;">
+      <div style="display:flex;flex-direction:column;gap:12px;max-width:800px;width:100%;position:relative;z-index:2;">
+        <div class="proto-row"><i class="fas fa-server" style="color:var(--sky);"></i><div class="proto-text"><strong style="color:#fff;">Serveurs lourds requis</strong> pour l'inférence — impossible à déployer sur le terrain</div></div>
+        <div class="proto-row"><i class="fas fa-mobile-alt" style="color:var(--sky);"></i><div class="proto-text"><strong style="color:#fff;">Faible portabilité mobile</strong> — solutions conçues uniquement pour PC/serveur</div></div>
+        <div class="proto-row"><i class="fas fa-eye" style="color:var(--sky);"></i><div class="proto-text"><strong style="color:#fff;">Architectures mono-pathologie</strong> — limitées à une seule maladie par système</div></div>
+        <div class="proto-row"><i class="fas fa-map-marked-alt" style="color:var(--sky);"></i><div class="proto-text"><strong style="color:#fff;">Peu adaptées aux zones rurales</strong> et aux contextes à ressources limitées</div></div>
+        <div class="proto-row"><i class="fas fa-lock" style="color:var(--sky);"></i><div class="proto-text"><strong style="color:#fff;">Solutions propriétaires</strong> avec licences coûteuses inaccessibles aux petites structures</div></div>
+      </div>
+    </div>
+    <div class="note-box anim-item d4"><i class="fas fa-lightbulb"></i> Ces limitations soulignent la nécessité d'une solution accessible, mobile et facilement déployable pour le dépistage intelligent des maladies oculaires.</div>
+  </div>
+</section>
+
+<!-- ═══ S7 — POSITIONNEMENT ═══ -->
+<section class="slide">
+  <div class="slide-card card-light">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div>
+    <div class="badge anim-item d1"><span class="badge-dot"></span> 02 — Positionnement</div>
+    <div class="s-title anim-item d2">Notre positionnement</div>
+    <div class="anim-item d3" style="flex:1;position:relative;z-index:2;overflow:auto;">
+      <table class="data-table">
+        <thead><tr><th>Critère</th><th>Solutions existantes</th><th>✨ AinDetect</th></tr></thead>
+        <tbody>
+          <tr><td>Déploiement</td><td>Matériel dédié / PC uniquement</td><td class="hl">📱 Smartphone</td></tr>
+          <tr><td>Pathologies</td><td>1 à 2 maladies par solution</td><td class="hl">🎯 4 à 6 classes</td></tr>
+          <tr><td>Coût</td><td>Très élevé (matériel + licences)</td><td class="hl">💰 SaaS abordable</td></tr>
+          <tr><td>Interface</td><td>Complexe / spécialisée</td><td class="hl">✨ Intuitive Flutter</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note-box anim-item d4" style="font-size:14px;font-weight:600;"><i class="fas fa-bolt"></i> AinDetect transforme un simple smartphone en outil de diagnostic clinique intelligent.</div>
+  </div>
+</section>
+
+<!-- ═══ S8 — VUE GLOBALE ═══ -->
+<section class="slide">
+  <div class="slide-card card-dark">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div>
+    <div class="badge anim-item d1"><span class="badge-dot"></span> 03 — Solution Proposée</div>
+    <div class="s-title anim-item d2">Vue globale du système</div>
+    <div class="flow-wrap anim-item d3">
+      <div class="flow-node"><i class="fas fa-mobile-screen-button" style="margin-right:6px;"></i>App Flutter</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><i class="fas fa-camera" style="margin-right:6px;"></i>Capture Fundus</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><i class="fas fa-brain" style="margin-right:6px;"></i>Modèle IA</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node"><i class="fas fa-file-medical" style="margin-right:6px;"></i>Rapport Clinique</div>
+    </div>
+    <div class="three-col anim-item d4" style="flex:1;align-content:start;">
+      <div class="col-card">
+        <div class="col-head"><div class="col-icon"><i class="fas fa-user-shield"></i></div><div class="col-title">Administrateur</div></div>
+        <div class="col-item">Gestion du personnel médical</div>
+        <div class="col-item">Supervision du système</div>
+        <div class="col-item">Accès au tableau de bord global</div>
+      </div>
+      <div class="col-card">
+        <div class="col-head"><div class="col-icon"><i class="fas fa-user-doctor"></i></div><div class="col-title">Médecin</div></div>
+        <div class="col-item">Examens et dossiers patients</div>
+        <div class="col-item">Diagnostics IA instantanés</div>
+        <div class="col-item">Suivi longitudinal des patients</div>
+      </div>
+      <div class="col-card">
+        <div class="col-head"><div class="col-icon"><i class="fas fa-cloud"></i></div><div class="col-title">IA + Firebase</div></div>
+        <div class="col-item">Inférence EfficientNetV2-S</div>
+        <div class="col-item">Stockage cloud sécurisé</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S9 — FONCTIONNALITÉS ═══ -->
+<section class="slide">
+  <div class="slide-card card-light">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div>
+    <div class="badge anim-item d1"><span class="badge-dot"></span> 03 — Fonctionnalités</div>
+    <div class="s-title anim-item d2">Fonctionnalités principales</div>
+    <div class="feat-grid anim-item d3">
+      <div class="feat-card"><div class="feat-icon"><i class="fas fa-lock"></i></div><div class="feat-title">Authentification sécurisée</div><div class="feat-desc">Connexion médecin / admin via Firebase Auth avec gestion des rôles</div></div>
+      <div class="feat-card"><div class="feat-icon"><i class="fas fa-camera-retro"></i></div><div class="feat-title">Capture guidée</div><div class="feat-desc">Repère circulaire pour aligner le fond d'œil + contrôle qualité automatique</div></div>
+      <div class="feat-card"><div class="feat-icon"><i class="fas fa-brain"></i></div><div class="feat-title">Diagnostic IA instantané</div><div class="feat-desc">Probabilités par pathologie en moins d'1 seconde via EfficientNetV2-S</div></div>
+      <div class="feat-card"><div class="feat-icon"><i class="fas fa-folder-open"></i></div><div class="feat-title">Dossiers patients</div><div class="feat-desc">Création, consultation et historique clinique complet par patient</div></div>
+      <div class="feat-card"><div class="feat-icon"><i class="fas fa-chart-line"></i></div><div class="feat-title">Statistiques & Dashboard</div><div class="feat-desc">Suivi longitudinal et tableaux de bord administrateur en temps réel</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S10 — ARCHITECTURE ═══ -->
+<section class="slide" id="slide-architecture">
+  <div class="slide-card card-dark">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div>
+    <div class="badge anim-item d1"><span class="badge-dot"></span> 04 — Conception</div>
+    <div class="s-title anim-item d2">Architecture générale du système</div>
+    <div class="arch-grid anim-item d3">
+      <div class="arch-col">
+        <div class="arch-header"><div class="arch-icon"><i class="fas fa-mobile-screen-button"></i></div><div><div class="arch-name">Application Mobile</div><div class="arch-sub">Flutter / Dart</div></div></div>
+        <div class="arch-item">Interface Médecin + Admin</div>
+        <div class="arch-item">Capture image fundus guidée</div>
+        <div class="arch-item">Affichage résultats IA temps réel</div>
+        <div class="arch-item">Gestion des dossiers patients</div>
+      </div>
+      <div class="arch-col">
+        <div class="arch-header"><div class="arch-icon"><i class="fas fa-cloud"></i></div><div><div class="arch-name">Backend Cloud</div><div class="arch-sub">Firebase (Google)</div></div></div>
+        <div class="arch-item">Firebase Auth — authentification sécurisée</div>
+        <div class="arch-item">Firestore — base de données temps réel</div>
+        <div class="arch-item">Storage — images fundus sécurisées</div>
+        <div class="arch-item">Synchronisation cloud instantanée</div>
+      </div>
+      <div class="arch-col">
+        <div class="arch-header"><div class="arch-icon"><i class="fas fa-brain"></i></div><div><div class="arch-name">Module IA</div><div class="arch-sub">Python / TensorFlow</div></div></div>
+        <div class="arch-item">EfficientNetV2-S entraîné</div>
+        <div class="arch-item">Pipeline prétraitement 224×224px</div>
+        <div class="arch-item">Augmentation de données</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ S14 — PARTIE MATÉRIELLE ═══ -->
+<section class="slide">
+  <div class="slide-card card-light">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div>
+    <div class="badge anim-item d1"><span class="badge-dot"></span> 05 — Partie Matérielle</div>
+    <div class="s-title anim-item d2">Environnement de développement</div>
+    <div class="anim-item d3" style="position:relative;z-index:2;flex:1;display:flex;flex-direction:column;gap:14px;">
+      
+      <div style="border-radius:16px;padding:20px;border:1px solid rgba(186,230,253,.5);background:white;">
+        <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--sky);margin-bottom:12px;"><i class="fas fa-laptop-code" style="margin-right:6px;"></i>Environnement logiciel</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <span class="hw-spec"><i class="fas fa-code"></i> Python 3.12.0</span>
+          <span class="hw-spec"><i class="fas fa-brain"></i> TensorFlow / Keras 2.10</span>
+          <span class="hw-spec"><i class="fab fa-android"></i> Android Studio</span>
+          <span class="hw-spec"><i class="fas fa-edit"></i> VS Code</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S15 — BACKEND ═══ -->
+<section class="slide">
+  <div class="slide-card card-dark">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div>
+    <div class="badge anim-item d1"><span class="badge-dot"></span> 06 — Backend</div>
+    <div class="s-title anim-item d2">Backend & Base de Données</div>
+    <div class="anim-item d3" style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:18px;align-content:center;position:relative;z-index:2;">
+
+      <div style="border-radius:20px;padding:28px 24px;border:1px solid rgba(14,165,233,.15);background:rgba(14,165,233,.05);display:flex;align-items:center;gap:20px;transition:all .3s;" onmouseover="this.style.borderColor='rgba(14,165,233,.4)'" onmouseout="this.style.borderColor='rgba(14,165,233,.15)'">
+        <div style="width:56px;height:56px;border-radius:16px;background:rgba(14,165,233,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fas fa-shield-halved" style="font-size:24px;color:var(--azure);"></i>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--azure);margin-bottom:6px;">Firebase Auth</div>
+          <div style="font-size:14px;color:var(--frost);line-height:1.6;">Authentification sécurisée médecin / admin — gestion des rôles et sessions</div>
+        </div>
+      </div>
+
+      <div style="border-radius:20px;padding:28px 24px;border:1px solid rgba(14,165,233,.15);background:rgba(14,165,233,.05);display:flex;align-items:center;gap:20px;transition:all .3s;" onmouseover="this.style.borderColor='rgba(14,165,233,.4)'" onmouseout="this.style.borderColor='rgba(14,165,233,.15)'">
+        <div style="width:56px;height:56px;border-radius:16px;background:rgba(14,165,233,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fas fa-database" style="font-size:24px;color:var(--azure);"></i>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--azure);margin-bottom:6px;">Cloud Firestore</div>
+          <div style="font-size:14px;color:var(--frost);line-height:1.6;">Base de données NoSQL temps réel — patients, examens, prédictions</div>
+        </div>
+      </div>
+
+      <div style="border-radius:20px;padding:28px 24px;border:1px solid rgba(14,165,233,.15);background:rgba(14,165,233,.05);display:flex;align-items:center;gap:20px;transition:all .3s;" onmouseover="this.style.borderColor='rgba(14,165,233,.4)'" onmouseout="this.style.borderColor='rgba(14,165,233,.15)'">
+        <div style="width:56px;height:56px;border-radius:16px;background:rgba(14,165,233,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fas fa-box-archive" style="font-size:24px;color:var(--azure);"></i>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--azure);margin-bottom:6px;">Firebase Storage</div>
+          <div style="font-size:14px;color:var(--frost);line-height:1.6;">Stockage sécurisé des images fundus au format optimisé</div>
+        </div>
+      </div>
+
+      <div style="border-radius:20px;padding:28px 24px;border:1px solid rgba(14,165,233,.15);background:rgba(14,165,233,.05);display:flex;align-items:center;gap:20px;transition:all .3s;" onmouseover="this.style.borderColor='rgba(14,165,233,.4)'" onmouseout="this.style.borderColor='rgba(14,165,233,.15)'">
+        <div style="width:56px;height:56px;border-radius:16px;background:rgba(14,165,233,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fas fa-plug" style="font-size:24px;color:var(--azure);"></i>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--azure);margin-bottom:6px;">Modèle Local (IA)</div>
+          <div style="font-size:14px;color:var(--frost);line-height:1.6;">Réception image → Prédiction EfficientNetV2-S → probabilités</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S16 — APPLICATION MOBILE ═══ -->
+<section class="slide">
+  <div class="slide-card card-light">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div>
+    <div class="badge anim-item d1"><span class="badge-dot"></span> 07 — Application Mobile</div>
+    <div class="s-title anim-item d2">Interfaces & Fonctionnalités</div>
+    <div class="anim-item d3" style="flex:1;display:flex;flex-direction:column;gap:8px;position:relative;z-index:2;">
+      <div class="obj-row"><div class="obj-num">1</div><div class="obj-body"><div class="obj-title">Authentification</div><div class="obj-text">Connexion sécurisée → accès au tableau de bord personnel du médecin</div></div></div>
+      <div class="obj-row"><div class="obj-num">2</div><div class="obj-body"><div class="obj-title">Dossier Patient</div><div class="obj-text">Création, indexation et consultation des fiches médicales patients</div></div></div>
+      <div class="obj-row"><div class="obj-num">3</div><div class="obj-body"><div class="obj-title">Capture Fundus</div><div class="obj-text">Repère circulaire guidé + contrôle automatique de la netteté du cliché</div></div></div>
+      <div class="obj-row"><div class="obj-num">4</div><div class="obj-body"><div class="obj-title">Diagnostic IA</div><div class="obj-text">Résultats probabilistes instantanés par pathologie en &lt; 1 seconde</div></div></div>
+      <div class="obj-row"><div class="obj-num">5</div><div class="obj-body"><div class="obj-title">Suivi Longitudinal</div><div class="obj-text">Historique + graphiques d'évolution par patient dans le temps</div></div></div>
+    </div>
+    <div class="chip-row anim-item d4">
+      <div class="chip"><i class="fas fa-check"></i>  Android </div>
+      <div class="chip"><i class="fas fa-check"></i> Interface réactive</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S-CNN — PRINCIPES DES CNN ═══ -->
+<section class="slide">
+  <div class="slide-card card-dark">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div>
+    <div class="badge anim-item d1"><span class="badge-dot"></span> 08 — Intelligence Artificielle</div>
+    <div class="s-title anim-item d2">Réseaux de Neurones Convolutifs (CNN)</div>
+    <div class="s-subtitle anim-item d2">Fondements théoriques</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;flex:1;align-content:start;position:relative;z-index:2;" class="anim-item d3">
+
+      <div style="border-radius:16px;padding:18px;background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.14);display:flex;gap:14px;align-items:flex-start;">
+        <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--sky),var(--cyan));display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-border-all" style="color:#fff;font-size:15px;"></i></div>
+        <div>
+          <div style="font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--azure);margin-bottom:5px;">Convolution</div>
+          <div style="font-size:12.5px;color:var(--frost);line-height:1.6;">Noyaux glissants extraient des <strong style="color:var(--aqua);">features locales</strong> : contours, textures, formes — indépendamment de leur position dans l'image.</div>
+        </div>
+      </div>
+
+      <div style="border-radius:16px;padding:18px;background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.14);display:flex;gap:14px;align-items:flex-start;">
+        <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--sky),var(--cyan));display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-compress-arrows-alt" style="color:#fff;font-size:15px;"></i></div>
+        <div>
+          <div style="font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--azure);margin-bottom:5px;">Pooling</div>
+          <div style="font-size:12.5px;color:var(--frost);line-height:1.6;"><strong style="color:var(--aqua);">Réduction spatiale</strong> de la carte de features, diminuant le coût de calcul tout en conservant l'information essentielle.</div>
+        </div>
+      </div>
+
+      <div style="border-radius:16px;padding:18px;background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.14);display:flex;gap:14px;align-items:flex-start;">
+        <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--sky),var(--cyan));display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-bolt-lightning" style="color:#fff;font-size:15px;"></i></div>
+        <div>
+          <div style="font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--azure);margin-bottom:5px;">Activation ReLU</div>
+          <div style="font-size:12.5px;color:var(--frost);line-height:1.6;">Introduit la <strong style="color:var(--aqua);">non-linéarité</strong> : max(0, x). Permet au réseau d'apprendre des relations complexes sans saturation du gradient.</div>
+        </div>
+      </div>
+
+      <div style="border-radius:16px;padding:18px;background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.14);display:flex;gap:14px;align-items:flex-start;">
+        <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--sky),var(--cyan));display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-layer-group" style="color:#fff;font-size:15px;"></i></div>
+        <div>
+          <div style="font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--azure);margin-bottom:5px;">Hiérarchie de features</div>
+          <div style="font-size:12.5px;color:var(--frost);line-height:1.6;">Couches profondes : de <strong style="color:var(--aqua);">pixels → bords → formes → structures sémantiques</strong>. Plus on est profond, plus les features sont abstraites.</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="note-box anim-item d4" style="margin-top:12px;"><i class="fas fa-eye"></i> Pour les images médicales, les CNN détectent automatiquement les anomalies rétiniennes que l'œil humain peut manquer.</div>
+  </div>
+</section>
+
+<!-- ═══ S-PRETRAINED — MODÈLES PRÉ-ENTRAÎNÉS ═══ -->
+<section class="slide">
+  <div class="slide-card card-light">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div>
+    <div class="badge anim-item d1"><span class="badge-dot"></span> 08 — Intelligence Artificielle</div>
+    <div class="s-title anim-item d2">Transfer Learning & Modèles Pré-entraînés</div>
+    <div class="s-subtitle anim-item d2">Approche utilisée dans AinDetect</div>
+
+    <div style="display:flex;gap:16px;flex:1;position:relative;z-index:2;" class="anim-item d3">
+
+      <!-- Left: concept -->
+      <div style="flex:1.1;display:flex;flex-direction:column;gap:10px;">
+        <div style="border-radius:14px;padding:16px 18px;background:white;border:1px solid rgba(186,230,253,.5);">
+          <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--sky);margin-bottom:10px;"><i class="fas fa-database" style="margin-right:6px;"></i>ImageNet — Base du Transfer Learning</div>
+          <div style="font-size:12.5px;color:var(--text-mid);line-height:1.6;">Base de données de <strong style="color:var(--sky);">1,2 million d'images</strong>, 1 000 classes. Les modèles pré-entraînés sur ImageNet ont déjà appris à détecter des features génériques (contours, textures, formes).</div>
+        </div>
+        <div style="border-radius:14px;padding:16px 18px;background:white;border:1px solid rgba(186,230,253,.5);">
+          <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--sky);margin-bottom:10px;"><i class="fas fa-snowflake" style="margin-right:6px;"></i>Fine-tuning — Adaptation au domaine médical</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="font-size:12px;color:var(--text-mid);display:flex;gap:8px;"><span style="color:var(--sky);font-weight:700;">1.</span> Couches de base <strong>gelées</strong> → features ImageNet conservées</div>
+            <div style="font-size:12px;color:var(--text-mid);display:flex;gap:8px;"><span style="color:var(--sky);font-weight:700;">2.</span> Nouvelle tête Dense <strong>entraînée</strong> → adaptation aux 4 classes oculaires</div>
+            <div style="font-size:12px;color:var(--text-mid);display:flex;gap:8px;"><span style="color:var(--sky);font-weight:700;">3.</span> Learning rate faible (5e-5) → ne casse pas les poids pré-entraînés</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: model comparison chips -->
+      <div style="flex:.9;display:flex;flex-direction:column;gap:10px;">
+        <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--sky);margin-bottom:2px;">Modèles comparés dans AinDetect</div>
+
+        <div style="border-radius:12px;padding:12px 16px;background:white;border:1px solid rgba(186,230,253,.5);display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:13px;font-weight:700;color:var(--text-dark);">EfficientNetV2-S</div>
+          <div style="font-size:11px;color:var(--sky);font-weight:600;">Compact · Précis · Mobile</div>
+        </div>
+        <div style="border-radius:12px;padding:12px 16px;background:white;border:1px solid rgba(186,230,253,.5);display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:13px;font-weight:700;color:var(--text-dark);">DenseNet121</div>
+          <div style="font-size:11px;color:var(--sky);font-weight:600;">Dense connections · Robuste</div>
+        </div>
+        <div style="border-radius:12px;padding:12px 16px;background:white;border:1px solid rgba(186,230,253,.5);display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:13px;font-weight:700;color:var(--text-dark);">MobileNetV2</div>
+          <div style="font-size:11px;color:var(--sky);font-weight:600;">Très léger · Dépôt rapide</div>
+        </div>
+        <div style="border-radius:12px;padding:12px 16px;background:white;border:1px solid rgba(186,230,253,.5);display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:13px;font-weight:700;color:var(--text-dark);">ConvNeXt-Tiny</div>
+          <div style="font-size:11px;color:var(--sky);font-weight:600;">Architecture moderne</div>
+        </div>
+
+        <div style="border-radius:12px;padding:12px 16px;background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.18);display:flex;align-items:center;gap:10px;margin-top:4px;">
+          <i class="fas fa-circle-check" style="color:var(--sky);font-size:18px;"></i>
+          <div style="font-size:12px;color:var(--sky);font-weight:600;">Choix final : EfficientNetV2-S<br><span style="font-weight:400;color:var(--text-mid);">Meilleur ratio précision / légèreté / vitesse</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S17 — IA : MODÈLE ═══ -->
+<section class="slide">
+  <div class="slide-card card-dark">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div>
+    <div class="badge anim-item d1"><span class="badge-dot"></span> 08 — Intelligence Artificielle</div>
+    <div class="s-title anim-item d2">Modèle EfficientNetV2-S</div>
+    <div style="display:flex;gap:20px;flex:1;position:relative;z-index:2;" class="anim-item d3">
+      <div style="flex:1.2;display:flex;flex-direction:column;gap:8px;">
+        <div style="font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--azure);margin-bottom:4px;">Architecture</div>
+        <div class="obj-row" style="border-color:rgba(14,165,233,.15);"><div class="obj-body"><div class="obj-title">Base EfficientNetV2-S</div><div class="obj-text">Pré-entraîné sur ImageNet via Transfer Learning — couches gelées</div></div></div>
+        <div class="obj-row" style="border-color:rgba(14,165,233,.15);"><div class="obj-body"><div class="obj-title">Fine-tuning</div><div class="obj-text">Entraînement sur les couches supérieures uniquement</div></div></div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+        <div style="font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--azure);margin-bottom:4px;">Justification du choix</div>
+        <div class="stat-card" style="padding:14px;gap:4px;"><div class="stat-icon" style="margin:0;"><i class="fas fa-rocket"></i></div><div class="stat-label" style="font-size:12.5px;">Rapide à entraîner vs DenseNet121 ou ViT</div></div>
+        <div class="stat-card" style="padding:14px;gap:4px;"><div class="stat-icon" style="margin:0;"><i class="fas fa-bullseye"></i></div><div class="stat-label" style="font-size:12.5px;">Précision comparable aux meilleurs modèles</div></div>
+        <div class="stat-card" style="padding:14px;gap:4px;"><div class="stat-icon" style="margin:0;"><i class="fas fa-mobile-screen-button"></i></div><div class="stat-label" style="font-size:12.5px;">Légèreté adaptée au déploiement mobile</div></div>
+      </div>
+    </div>
+    <div class="chip-row anim-item d4">
+      <div class="chip model-chip winner"><i class="fas fa-check"></i> EfficientNetV2-S ✓</div>
+      <div class="chip model-chip">DenseNet121</div>
+      <div class="chip model-chip">MobileNetV2</div>
+      <div class="chip model-chip">ConvNeXt-Tiny</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S18 — DATASET ═══ -->
+<section class="slide">
+  <div class="slide-card card-light">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div>
+    <div class="badge anim-item d1"><span class="badge-dot"></span> 08 — Dataset & Entraînement</div>
+    <div class="s-title anim-item d2">Datasets & Hyperparamètres</div>
+    <div class="ds-grid anim-item d3" style="margin-bottom:14px;">
+      <div class="ds-card selected">
+        <div class="ds-badge ok"><i class="fas fa-check"></i> Retenu</div>
+        <div class="ds-name">Dataset 1 — Kaggle Eye Diseases</div>
+        <div class="ds-row"><span class="ds-key">Classes</span><span class="ds-val">4 classes</span></div>
+        <div class="ds-row"><span class="ds-key">Images</span><span class="ds-val">4 212 images</span></div>
+        <div class="ds-row"><span class="ds-key">Split</span><span class="ds-val">80 / 10 / 10 %</span></div>
+        <div class="ds-row"><span class="ds-key">Pathologies</span><span class="ds-val">Cataracte · Rétinopathie · Glaucome · Normal</span></div>
+      </div>
+      <div class="ds-card">
+        <div class="ds-badge exp">Exploré</div>
+        <div class="ds-name">Dataset 2 — Kaggle (public)</div>
+        <div class="ds-row"><span class="ds-key">Classes</span><span class="ds-val">6 classes</span></div>
+        <div class="ds-row"><span class="ds-key">Images</span><span class="ds-val">4 843 images</span></div>
+        <div class="ds-row"><span class="ds-key">Split</span><span class="ds-val">80 / 20 %</span></div>
+        <div class="ds-row"><span class="ds-key">Pathologies</span><span class="ds-val">Rétinopathie · Glaucome · Sain · Cicatrice · Myopie · Ptérygion</span></div>
+      </div>
+    </div>
+    <div class="anim-item d4" style="position:relative;z-index:2;">
+      <div style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--sky);margin-bottom:8px;">Hyperparamètres</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <span class="hw-spec">Batch Size : 32</span>
+        <span class="hw-spec">Époques : 30</span>
+        <span class="hw-spec">Prétraitement : 224×224 px</span>
+        <span class="hw-spec">Normalisation + Augmentation</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S19 — TESTS ═══ -->
+<section class="slide">
+  <div class="slide-card card-dark">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div>
+    <div class="badge anim-item d1"><span class="badge-dot"></span> 09 — Tests & Validation</div>
+    <div class="s-title anim-item d2">Comparaison des modèles — Métriques complètes</div>
+    <div class="anim-item d3" style="flex:1;position:relative;z-index:2;overflow:auto;">
+      <table class="data-table" style="font-size:12px;">
+  <thead>
+    <tr>
+      <th>Modèle</th>
+      <th style="color:#FBBF24;">Train Acc.</th>
+      <th style="color:#F59E0B;">Valid Acc.</th>
+      <th style="color:#38BDF8;">Test Acc.</th>
+      <th style="color:#22D3EE;">Précision</th>
+      <th style="color:#67E8F9;">Rappel</th>
+      <th style="color:#A5F3FC;">F1-Score</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ConvNeXt-Tiny</td>
+      <td>88,79%</td>
+      <td>83,05%</td>
+      <td>89,07%</td>
+      <td>89,79%</td>
+      <td>89,01%</td>
+      <td>89,05%</td>
+    </tr>
+    <tr>
+      <td>MobileNetV2</td>
+      <td>95,50 %</td>
+      <td>93,54 %</td>
+      <td>92,16%</td>
+      <td>92,41%</td>
+      <td>92,12%</td>
+      <td>92,10%</td>
+    </tr>
+    <tr>
+      <td>DenseNet121 <br><small style="color:#ef4444;">(Overfitting)</small></td>
+      <td>99,91%</td>
+      <td>92,36%</td>
+      <td>95,72%</td>
+      <td>95,85%</td>
+      <td>95,74%</td>
+      <td>95,73%</td>
+    </tr>
+    <tr class="hl-row">
+      <td><strong>EfficientNetV2-S ✓ (retenu)</strong></td>
+      <td><strong>96,06%</strong></td>
+      <td><strong>93,79%</strong></td>
+      <td><strong>94,77%</strong></td>
+      <td><strong>94,75%</strong></td>
+      <td><strong>94,74%</strong></td>
+      <td><strong>94,74%</strong></td>
+    </tr>
+  </tbody>
+
+      </table>
+      <div style="margin-top:10px;padding:10px 14px;border-radius:10px;background:rgba(14,165,233,.05);border:1px solid rgba(14,165,233,.12);font-size:11.5px;color:var(--azure);position:relative;z-index:2;">
+        <i class="fas fa-info-circle" style="margin-right:6px;"></i>
+        <strong>Pourquoi EfficientNetV2-S ?</strong> Bien que DenseNet121 atteigne 95,72% d'accuracy, L'EfficientNetV2-S a été sélectionné car il surpasse le DenseNet121 sur deux critères majeurs : l'absence de surapprentissage (gap de généralisation minimal) et l'efficience computationnelle, deux piliers indispensables pour faire tourner le système de détection de manière fluide sur un téléphone Android.
+      </div>
+    </div>
+    <div class="chip-row anim-item d4" style="margin-top:10px;">
+      <div class="chip"><i class="fas fa-check" style="color:#10B981;"></i> Authentification</div>
+      <div class="chip"><i class="fas fa-check" style="color:#10B981;"></i> Capture image</div>
+      <div class="chip"><i class="fas fa-check" style="color:#10B981;"></i> Pipeline IA</div>
+      <div class="chip"><i class="fas fa-check" style="color:#10B981;"></i> Dossiers patients</div>
+      <div class="chip"><i class="fas fa-check" style="color:#10B981;"></i> Dashboard</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S20 — RÉSULTATS ═══ -->
+<section class="slide">
+  <div class="slide-card card-light">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div>
+    <div class="badge anim-item d1"><span class="badge-dot"></span> 09 — Résultats</div>
+    <div class="s-title anim-item d2">Performances du système</div>
+    <div class="big-stats anim-item d3">
+      <div class="big-stat"><div class="big-stat-num">94,75%</div><div class="big-stat-label">Précision globale — Dataset 1</div></div>
+      <div class="big-stat"><div class="big-stat-num">94,74%</div><div class="big-stat-label">F1-Score moyen — Dataset 1</div></div>
+      <div class="big-stat"><div class="big-stat-num">94,77%</div><div class="big-stat-label">Test Accuracy globale — Dataset 1</div></div>
+    </div>
+    <div class="anim-item d4" style="position:relative;z-index:2;flex:1;overflow:auto;">
+      <table class="perf-table">
+        <thead><tr><th>Pathologie</th><th>Précision</th><th>Rappel</th><th>F1-Score</th></tr></thead>
+        <tbody>
+          <tr><td>Cataracte</td><td>97,12%</td><td>96,19%</td><td>96,65%</td></tr>
+          <tr><td>Rétinopathie diabétique</td><td>97,27%</td><td>96,40%</td><td>96,83%</td></tr>
+          <tr><td>Glaucome</td><td>94,12%</td><td>94,12%</td><td>94,12%</td></tr>
+          <tr><td>Normal</td><td>90,48%</td><td>92,23%</td><td>91,35%</td></tr>
+          <tr class="avg-row"><td><strong>MOYENNE</strong></td><td><strong>94,75%</strong></td><td><strong>94,74%</strong></td><td><strong>94,74%</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S21 — BUSINESS MODEL CANVAS ═══ -->
+<section class="slide">
+  <div class="slide-card card-dark">
+
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div class="badge anim-item d1">
+      <span class="badge-dot"></span>
+      10 — Étude Économique
+    </div>
+
+    <div class="s-title anim-item d2">
+      Business Model Canvas — AinDetect
+    </div>
+
+    <div
+      class="anim-item d3"
+      style="
+        flex:1;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        padding-top:10px;
+      "
+    >
+
+      <img
+        src="https://i.postimg.cc/K81wF3M3/BMC-Final.jpg"
+        alt="Business Model Canvas AinDetect"
+        style="
+          width:100%;
+          max-width:1250px;
+          max-height:480px;
+          object-fit:contain;
+          border-radius:20px;
+          box-shadow:0 20px 50px rgba(0,0,0,.35);
+          border:1px solid rgba(255,255,255,.08);
+        "
+      >
+
+    </div>
+
+  </div>
+</section>
+<!-- ═══ S22 — BILAN DU PROJET ═══ -->
+<section class="slide">
+  <div class="slide-card card-light">
+
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div class="badge anim-item d1">
+      <span class="badge-dot"></span>
+      11 — Conclusion
+    </div>
+
+    <div class="s-title anim-item d2">
+      Bilan du projet AinDetect
+    </div>
+
+    <div
+      class="anim-item d3"
+      style="
+        flex:1;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        padding-top:20px;
+      "
+    >
+
+      <img
+        src="https://i.postimg.cc/VNj7LqL0/synthese.png"
+        alt="Bilan du projet AinDetect"
+        style="
+          width:100%;
+          max-width:1200px;
+          max-height:650px;
+          object-fit:contain;
+          border-radius:20px;
+          box-shadow:0 20px 50px rgba(0,0,0,.15);
+          border:1px solid rgba(14,165,233,.12);
+        "
+      >
+
+    </div>
+
+  </div>
+</section>
+<!-- ═══ S23 — LIMITES ═══ -->
+<section class="slide">
+  <div class="slide-card card-dark">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div>
+    <div class="badge anim-item d1"><span class="badge-dot"></span> 11 — Limites identifiées</div>
+    <div class="s-title anim-item d2">Limites identifiées</div>
+    <div class="three-col anim-item d3" style="flex:1;align-content:start;">
+      <div class="col-card">
+        <div class="col-head"><div class="col-icon"><i class="fas fa-database"></i></div><div class="col-title" style="color:#F59E0B;">📊 Datasets</div></div>
+        <div class="col-item">4 212 images seulement — stades précoces du glaucome sous-représentés</div>
+        <div class="col-item">Déséquilibre dans Dataset 2 (Ptérygion, Cicatrice maculaire)</div>
+        <div class="col-item">Pas de test sur données externes (autres hôpitaux)</div>
+      </div>
+      <div class="col-card">
+        <div class="col-head"><div class="col-icon"><i class="fas fa-flask"></i></div><div class="col-title" style="color:#EF4444;">🔬 Méthodologie</div></div>
+        <div class="col-item">Pas encore testé en conditions cliniques réelles</div>
+      </div>
+      <div class="col-card">
+        <div class="col-head"><div class="col-icon"><i class="fas fa-triangle-exclamation"></i></div><div class="col-title" style="color:#A78BFA;">⚠️ Erreurs</div></div>
+        <div class="col-item">65% des erreurs : Normal vs Glaucome (stades précoces similaires)</div>
+        <div class="col-item">22% des erreurs Dataset 2 : Ptérygion vs Cicatrice maculaire</div>
+        <div class="col-item">Lésions glaucomateuses précoces difficiles à distinguer d'un fond d'œil sain</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S24 — PERSPECTIVES ═══ -->
+<section class="slide">
+  <div class="slide-card card-light">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div>
+    <div class="badge anim-item d1"><span class="badge-dot"></span> 11 — Travaux futurs</div>
+    <div class="s-title anim-item d2">Travaux futurs & Perspectives</div>
+    <div class="tl3 anim-item d3" style="margin-bottom:14px;">
+      <div class="tl3-col">
+        <div class="tl3-header"><div class="tl3-dot" style="background:var(--sky);box-shadow:0 0 8px rgba(14,165,233,.4);"></div><div class="tl3-period">Court terme</div></div>
+        <div class="tl3-item">Finaliser les tests cliniques avec un hôpital partenaire</div>
+        <div class="tl3-item">Application IOS</div>
+      </div>
+      <div class="tl3-col">
+        <div class="tl3-header"><div class="tl3-dot" style="background:var(--cyan);box-shadow:0 0 8px rgba(34,211,238,.4);"></div><div class="tl3-period">Moyen terme</div></div>
+        <div class="tl3-item">Augmenter les datasets (objectif : 20 000+ images)</div>
+        <div class="tl3-item">Tester Vision Transformers (ViT) + modèles hybrides CNN+Transformer</div>
+        <div class="tl3-item">Intégrer Grad-CAM pour l'explicabilité des décisions IA,</div>
+        <!--Intégration de Grad-CAM pour générer des cartes de chaleur visuelles, permettant aux cliniciens de comprendre et de valider les zones de la rétine ayant motivé le diagnostic de l'IA.--!>
+      </div>
+      <div class="tl3-col">
+        <div class="tl3-header"><div class="tl3-dot" style="background:var(--aqua);box-shadow:0 0 8px rgba(103,232,249,.4);"></div><div class="tl3-period">Long terme</div></div>
+        <div class="tl3-item">Partenariats industriels avec fabricants de matériel médical</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S25 — MERCI ═══ -->
+<section class="slide">
+  <div class="slide-card card-dark" style="justify-content:center;">
+    <div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div>
+    <div class="ty-wrap">
+      <div class="ty-title anim-item d1">MERCI</div>
+      <div class="ty-sub anim-item d2" style="font-style:italic;max-width:640px;">❝ AinDetect n'est pas seulement un outil technologique performant, mais aussi un modèle économique viable et socialement impactant, capable de transformer durablement l'accès aux soins ophtalmologiques. ❞</div>
+      <div class="anim-item d3" style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--azure);opacity:.7;margin-top:8px;text-align:left;">
+        <div><i class="fas fa-user-graduate" style="margin-right:8px;"></i><strong style="color:var(--frost);">Étudiante :</strong> Mlle. Belabiod Nourhene</div>
+        <div><i class="fas fa-chalkboard-teacher" style="margin-right:8px;"></i><strong style="color:var(--frost);">Encadrante :</strong> Dr. Benbakreti Soumia</div>
+        <div><i class="fas fa-university" style="margin-right:8px;"></i><strong style="color:var(--frost);">Établissement :</strong> Université Djillali Liabès — Département Informatique, SBA</div>
+        <div><i class="fas fa-star" style="margin-right:8px;"></i><strong style="color:var(--frost);">Dispositif :</strong> Startup 1275 &nbsp;|&nbsp; Spécialité WIC &nbsp;|&nbsp; 2025–2026</div>
+      </div>
+      <div class="anim-item d4" style="margin-top:16px;font-size:16px;font-weight:700;color:var(--azure);opacity:.9;">🎤 Des questions ?</div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<div class="sidepills" id="sidepills"></div>
+<nav class="bottomnav" aria-label="Navigation">
+  <button class="bn-btn" id="prevBtn" onclick="goTo(cur-1)" aria-label="Précédent" disabled><i class="fas fa-chevron-left"></i></button>
+  <div class="bn-dots" id="dots"></div>
+  <div class="bn-counter" id="counter">1 / 1</div>
+  <button class="bn-btn" id="nextBtn" onclick="goTo(cur+1)" aria-label="Suivant"><i class="fas fa-chevron-right"></i></button>
+</nav>
+
+<script>
+/* ── Background canvas ── */
+const canvas=document.getElementById('bgCanvas'),ctx=canvas.getContext('2d');let W,H;
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}
+resize();window.addEventListener('resize',resize);
+class B{constructor(){this.x=Math.random()*W;this.y=Math.random()*H;this.r=100+Math.random()*200;this.vx=(Math.random()-.5)*.25;this.vy=(Math.random()-.5)*.25;this.h=[192,198,204,188,185][Math.floor(Math.random()*5)];this.a=.025+Math.random()*.035}update(){this.x+=this.vx;this.y+=this.vy;if(this.x<-this.r)this.x=W+this.r;if(this.x>W+this.r)this.x=-this.r;if(this.y<-this.r)this.y=H+this.r;if(this.y>H+this.r)this.y=-this.r}draw(){const g=ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,Math.max(1,this.r));g.addColorStop(0,`hsla(${this.h},80%,50%,${this.a})`);g.addColorStop(1,`hsla(${this.h},80%,50%,0)`);ctx.fillStyle=g;ctx.beginPath();ctx.arc(this.x,this.y,Math.max(1,this.r),0,Math.PI*2);ctx.fill()}}
+const blobs=[];for(let i=0;i<7;i++)blobs.push(new B());
+const pts=[];
+class P{constructor(){this.reset()}reset(){this.x=Math.random()*W;this.y=H+10;this.r=.8+Math.random()*1.5;this.vy=-(.2+Math.random()*.6);this.vx=(Math.random()-.5)*.15;this.a=.15+Math.random()*.3;this.l=0;this.m=300+Math.random()*400}update(){this.x+=this.vx;this.y+=this.vy;this.l++;if(this.l>this.m||this.y<-10)this.reset()}draw(){const a=this.a*(1-this.l/this.m);ctx.fillStyle=`rgba(56,189,248,${a})`;ctx.beginPath();ctx.arc(this.x,this.y,Math.max(.5,this.r),0,Math.PI*2);ctx.fill()}}
+for(let i=0;i<50;i++){const p=new P();p.y=Math.random()*H;p.l=Math.random()*p.m;pts.push(p);}
+function drawLines(){for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<110){ctx.strokeStyle=`rgba(56,189,248,${(1-d/110)*.06})`;ctx.lineWidth=.5;ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.stroke()}}}
+function animate(){ctx.clearRect(0,0,W,H);blobs.forEach(b=>{b.update();b.draw()});pts.forEach(p=>{p.update();p.draw()});drawLines();requestAnimationFrame(animate)}
+animate();
+
+/* ── Slide navigation ── */
+let cur=0;
+const slides=document.querySelectorAll('.slide');
+const total=slides.length;
+
+function goTo(i){
+  if(i<0||i>=total||i===cur)return;
+  slides[cur].classList.remove('active');
+  slides[cur].querySelectorAll('.anim-item').forEach(el=>{el.style.opacity='0';el.style.animation='none';});
+  cur=i;
+  slides[cur].classList.add('active');
+  void slides[cur].offsetWidth; // force reflow
+  slides[cur].querySelectorAll('.anim-item').forEach(el=>{el.style.opacity='';el.style.animation='';});
+  updateNav();
+}
+
+/* Navigate to a slide by its data-label attribute */
+function goToByLabel(label){
+  for(let i=0;i<slides.length;i++){
+    if(slides[i].dataset.label===label||(label==='architecture'&&slides[i].id==='slide-architecture')){
+      goTo(i);return;
+    }
+  }
+}
+
+function updateNav(){
+  const prevBtn=document.getElementById('prevBtn'),nextBtn=document.getElementById('nextBtn');
+  if(prevBtn)prevBtn.disabled=(cur===0);
+  if(nextBtn)nextBtn.disabled=(cur===total-1);
+  document.getElementById('counter').textContent=`${cur+1} / ${total}`;
+  document.getElementById('progressFill').style.width=`${((cur+1)/total)*100}%`;
+  document.querySelectorAll('.bn-dot').forEach((d,i)=>d.classList.toggle('on',i===cur));
+  document.querySelectorAll('.sp').forEach((s,i)=>s.classList.toggle('on',i===cur));
+}
+
+/* Build dots & pills */
+const dotsEl=document.getElementById('dots');
+for(let i=0;i<total;i++){
+  const d=document.createElement('button');
+  d.className='bn-dot'+(i===0?' on':'');
+  d.setAttribute('aria-label',`Slide ${i+1}`);
+  d.onclick=()=>goTo(i);
+  dotsEl.appendChild(d);
+}
+const spEl=document.getElementById('sidepills');
+for(let i=0;i<total;i++){
+  const s=document.createElement('div');
+  s.className='sp'+(i===0?' on':'');
+  s.textContent=i+1;
+  s.onclick=()=>goTo(i);
+  spEl.appendChild(s);
+}
+
+/* Keyboard */
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){e.preventDefault();goTo(cur+1);}
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();goTo(cur-1);}
+  if(e.key==='Home'){e.preventDefault();goTo(0);}
+  if(e.key==='End'){e.preventDefault();goTo(total-1);}
+  if(e.key==='f'||e.key==='F')toggleFS();
+});
+
+/* Touch swipe */
+let sx=0,sy=0;
+document.addEventListener('touchstart',e=>{sx=e.changedTouches[0].screenX;sy=e.changedTouches[0].screenY;},{passive:true});
+document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].screenX-sx,dy=e.changedTouches[0].screenY-sy;if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>50){dx<0?goTo(cur+1):goTo(cur-1);}},{passive:true});
+
+/* Mouse wheel */
+let wl=false;
+document.addEventListener('wheel',e=>{if(wl)return;wl=true;e.deltaY>0?goTo(cur+1):goTo(cur-1);setTimeout(()=>wl=false,700);},{passive:true});
+
+/* Fullscreen */
+function toggleFS(){if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{});else document.exitFullscreen();}
+
+/* Toast */
+function toast(m){const t=document.getElementById('toast');document.getElementById('toastTxt').textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+
+updateNav();
+</script>
+</body>
+</html>
